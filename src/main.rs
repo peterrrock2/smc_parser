@@ -184,7 +184,7 @@ fn canonicalize_ben_from_csv<R: BufRead, W: Write>(reader: R, writer: W) -> io::
 }
 
 fn main() {
-    let args = Command::new("canonicalize_jsonl")
+    let args = Command::new("smc-parser")
         .version("0.1.0")
         .about("Canonicalize jsonl file")
         .arg(
