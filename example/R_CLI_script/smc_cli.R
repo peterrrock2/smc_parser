@@ -13,20 +13,24 @@ p <- add_argument(p,
   type = "character"
 )
 p <- add_argument(p,
-  "--pop_col",
+  "--pop-col",
   help = "Enter the name of the population column within the shapefile",
   default = "TOTPOP",
   type = "character"
 )
-p <- add_argument(p, "--n_dists", help = "Enter the number of districts for the redistricting.", type = "integer")
 p <- add_argument(p,
-  "--pop_tol",
+  "--n_dists",
+  help = "Enter the number of districts for the redistricting.",
+  type = "integer"
+)
+p <- add_argument(p,
+  "--pop-tol",
   help = "Enter the allowable population deviance [between 0 and 1]",
   default = 0.01,
   type = "double"
 )
 p <- add_argument(p,
-  "--pop_bounds",
+  "--pop-bounds",
   help = "Enter the population bounds with formatting (lower, target, upper)",
   default = NULL,
   type = "integer",
@@ -34,7 +38,12 @@ p <- add_argument(p,
 )
 
 # TAGS FOR THE REDIST_SMC CALL
-p <- add_argument(p, "--n_sims", help = "Enter the number of simulations to draw from", default = 1000, type = "integer")
+p <- add_argument(p,
+  "--n-sims",
+  help = "Enter the number of simulations to draw from",
+  default = 1000,
+  type = "integer"
+)
 p <- add_argument(p,
   "--compactness",
   help = "Enter the compactness measure for the generated districts",
@@ -47,29 +56,29 @@ p <- add_argument(p,
   flag = TRUE
 )
 p <- add_argument(p,
-  "--adapt_k_thresh",
+  "--adapt-k-thresh",
   help = "Enter the threshold value used in teh heuristic to select a value ki for each splitting iteration",
   default = 0.985,
   type = "double"
 )
 p <- add_argument(p,
-  "--seq_alpha",
+  "--seq-alpha",
   help = "Enter the amount to adjust the weights by at each resampling step.", default = 0.5, type = "double"
 )
 p <- add_argument(p,
-  "--pop_temper",
+  "--pop-temper",
   help = "Enter the strength of the automatic population tempering",
   default = 0.0,
   type = "double"
 )
 p <- add_argument(p,
-  "--final_infl",
+  "--final-infl",
   help = "Enter the multiplier for the population constraint",
   default = 1,
   type = "double"
 )
 p <- add_argument(p,
-  "--est_label_mult",
+  "--est-label-mult",
   help = "Enter the multiplier for the number of importance samples",
   default = 1.0,
   type = "double"
@@ -88,20 +97,20 @@ p <- add_argument(p,
 
 # OTHER FLAGS FOR DATA PROCESSING AND REPRODUCIBILITY
 p <- add_argument(p,
-  "--rng_seed",
+  "--rng-seed",
   help = "Enter the rng seed for the run",
   default = 42,
   type = "integer"
 )
 p <- add_argument(p,
-  "--tally_cols",
+  "--tally-cols",
   help = "Enter the names of the columns that you would like to tally",
   default = NULL,
   type = "character",
   nargs = "+"
 )
 p <- add_argument(p,
-  "--output_file",
+  "--output-file",
   help = "Enter the name of the output file.",
   default = "./test_output.csv",
   type = "character"
@@ -117,8 +126,6 @@ argv <- parse_args(p)
 vtds <- st_read(dsn = paste0(argv$shapefile))
 
 population <- sum(vtds[[argv$pop_col]])
-# print(paste("The total population is", population))
-# print(paste("We have to split into", argv$n_dists))
 
 if (is.null(argv$pop_bounds) || length(argv$pop_bounds) != 3) {
   argv$pop_bounds <- NULL
