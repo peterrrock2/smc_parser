@@ -53,7 +53,8 @@ dependencies = [
 [[package]]
 name = "binary-ensemble"
 version = "0.1.1"
-source = "git+https://github.com/peterrrock2/binary-ensemble.git?branch=dev/0.1.1#fb803934decd1541fb1364929aa2fe01184f683d"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "26b79a285f14f79d96a86d019e178c01ea4fbaed41087deaf8be83215387f833"
 dependencies = [
  "byteorder",
  "clap",

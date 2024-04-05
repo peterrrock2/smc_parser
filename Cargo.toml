@@ -6,5 +6,5 @@ edition = "2021"
 [dependencies]
 clap = "4.5.4"
 serde_json = "1.0.115"
-binary-ensemble = {git = "https://github.com/peterrrock2/binary-ensemble.git", branch = "dev/0.1.1"}
+binary-ensemble = "^0.1.1"
 csv = "1.3.0"
