@@ -87,6 +87,7 @@ fn canonicalize_jsonl_from_csv<R: BufRead, W: Write>(reader: R, mut writer: W) -
         log!("Processing sample {}\r", sample);
         let assignment = str_line
             .iter()
+            .skip(1) // Skip the sample number
             .map(|x| {
                 x.parse::<u16>()
                     .expect(format!("Failed to parse {} as u16 in sample {}", x, sample).as_str())
@@ -94,7 +95,7 @@ fn canonicalize_jsonl_from_csv<R: BufRead, W: Write>(reader: R, mut writer: W) -
             .collect::<Vec<u16>>();
 
         let json_line = json!({
-            "assignment": assignment[1..],
+            "assignment": assignment,
             "sample": sample
         })
         .to_string();
@@ -167,6 +168,7 @@ fn canonicalize_ben_from_csv<R: BufRead, W: Write>(reader: R, writer: W) -> io::
         log!("Processing sample {}\r", sample);
         let assignment = str_line
             .iter()
+            .skip(1) // Skip the sample number
             .map(|x| {
                 x.parse::<u16>()
                     .expect(format!("Failed to parse {} as u16 in sample {}", x, sample).as_str())
@@ -174,7 +176,7 @@ fn canonicalize_ben_from_csv<R: BufRead, W: Write>(reader: R, writer: W) -> io::
             .collect::<Vec<u16>>();
 
         ben_encoder
-            .write_assignment(assignment[1..].to_vec())
+            .write_assignment(assignment.to_vec())
             .expect("Failed to encode as Ben");
         sample += 1;
     }
@@ -185,7 +187,7 @@ fn canonicalize_ben_from_csv<R: BufRead, W: Write>(reader: R, writer: W) -> io::
 
 fn main() {
     let args = Command::new("smc-parser")
-        .version("0.1.0")
+        .version("0.1.1")
         .about("Canonicalize jsonl file")
         .arg(
             Arg::new("input_csv")
