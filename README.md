@@ -44,6 +44,10 @@ Here are a list of the flags for the CLI
 - `-w --overwrite` A boolean flag that, when included, will force the output file of the
   `-o` file to be overwritten and will suppress the user query prompt.
 
+- `--config-env <VAR>` Reads a version-1 gerrytools SMC config from the named environment
+  variable. Config mode cannot be combined with legacy flags. It selects the writer and output
+  path from the document and writes the exact config to `<output-stem>_metadata.jsonl` when
+  output goes to a file.
 
 ## Example
 
