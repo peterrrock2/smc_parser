@@ -135,9 +135,15 @@ fn parse_config(raw: &str) -> std::result::Result<RunConfig, String> {
     })
 }
 
-fn load_config_env(environment_name: &str) -> std::result::Result<RunConfig, String> {
-    let raw = env::var(environment_name)
-        .map_err(|_| format!("Environment variable {environment_name} is not set"))?;
+/// Resolves `--config` to a config document: inline JSON (starts with `{`) or
+/// a path to a JSON file.
+fn load_config_arg(config_arg: &str) -> std::result::Result<RunConfig, String> {
+    let raw = if config_arg.trim_start().starts_with('{') {
+        config_arg.to_string()
+    } else {
+        fs::read_to_string(config_arg)
+            .map_err(|error| format!("Could not read config '{config_arg}': {error}"))?
+    };
     parse_config(&raw)
 }
 
@@ -293,9 +299,12 @@ fn cli() -> Command {
         .version(env!("CARGO_PKG_VERSION"))
         .about("Canonicalize redist SMC output")
         .arg(
-            Arg::new("config_env")
-                .long("config-env")
-                .help("Read a versioned gerrytools config from this environment variable")
+            Arg::new("config")
+                .long("config")
+                .help(
+                    "Versioned gerrytools config: inline JSON (starts with '{') or a path \
+                    to a JSON file",
+                )
                 .conflicts_with_all([
                     "input_csv",
                     "output_file",
@@ -364,8 +373,8 @@ fn main() {
         env::set_var("RUST_LOG", "trace");
     }
 
-    let config = args.get_one::<String>("config_env").map(|name| {
-        load_config_env(name).unwrap_or_else(|error| {
+    let config = args.get_one::<String>("config").map(|config_arg| {
+        load_config_arg(config_arg).unwrap_or_else(|error| {
             clap::Error::raw(clap::error::ErrorKind::InvalidValue, error).exit()
         })
     });
@@ -508,7 +517,7 @@ mod tests {
     #[test]
     fn config_mode_rejects_legacy_flags() {
         let error = cli()
-            .try_get_matches_from(["smc_parser", "--config-env", "GERRYTOOLS_CONFIG", "--jsonl"])
+            .try_get_matches_from(["smc_parser", "--config", "{}", "--jsonl"])
             .unwrap_err();
         assert_eq!(error.kind(), clap::error::ErrorKind::ArgumentConflict);
     }
