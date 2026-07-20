@@ -9,22 +9,10 @@ use std::{
 };
 
 const CONFIG_VERSION: i64 = 1;
+// The parser validates only what it consumes: the envelope and the io section.
+// The map/run sections belong to the R CLI, so their inner fields are not
+// checked here and can evolve without a parser release.
 const IO_FIELDS: &[&str] = &["graph", "output", "writer"];
-const MAP_FIELDS: &[&str] = &["pop_col", "n_dists", "pop_tol", "pop_bounds"];
-const RUN_FIELDS: &[&str] = &[
-    "n_sims",
-    "rng_seed",
-    "compactness",
-    "resample",
-    "adapt_k_thresh",
-    "seq_alpha",
-    "pop_temper",
-    "final_infl",
-    "est_label_mult",
-    "verbose",
-    "silent",
-    "tally_columns",
-];
 
 macro_rules! log {
     ($($arg:tt)*) => {{
@@ -103,11 +91,9 @@ fn parse_config(raw: &str) -> std::result::Result<RunConfig, String> {
     }
 
     let io_config = require_object(&config["io"], "config.io")?;
-    let map_config = require_object(&config["map"], "config.map")?;
-    let run_config = require_object(&config["run"], "config.run")?;
+    require_object(&config["map"], "config.map")?;
+    require_object(&config["run"], "config.run")?;
     require_fields(io_config, IO_FIELDS, "config.io")?;
-    require_fields(map_config, MAP_FIELDS, "config.map")?;
-    require_fields(run_config, RUN_FIELDS, "config.run")?;
     if !config["constraints"].is_array() {
         return Err("config.constraints must be a JSON array".to_string());
     }
@@ -508,10 +494,16 @@ mod tests {
             .unwrap_err()
             .contains("Expected engine 'smc'"));
         config["engine"] = json!("smc");
-        config["map"].as_object_mut().unwrap().remove("n_dists");
+        config["io"].as_object_mut().unwrap().remove("writer");
         assert!(parse_config(&config.to_string())
             .unwrap_err()
-            .contains("config.map is missing required fields: n_dists"));
+            .contains("config.io is missing required fields: writer"));
+        // Fields the parser does not consume (map/run internals) are the R
+        // CLI's contract, not the parser's, so their absence is accepted.
+        let mut config: Value = serde_json::from_str(&valid_config()).unwrap();
+        config["run"].as_object_mut().unwrap().clear();
+        config["map"].as_object_mut().unwrap().clear();
+        assert!(parse_config(&config.to_string()).is_ok());
     }
 
     #[test]
